@@ -144,6 +144,10 @@
     this.rows = 8;
     this.cols = 8;
     this.charList = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    this.board = new Array(this.rows * this.cols).fill(false);
+
+    this.lastAdd = 0; // last chacter added (in s ago)
+    this.speed = .8; //s
 
     this.lastTime;
     this.aId;
@@ -152,11 +156,38 @@
   }
 
   Game.prototype = {
+    fillRandomTile: function() {
+      const emptyTiles = [];
+
+      for (let i = this.board.length - 1; i >= 0; i--) {
+        if (!this.board[i]) emptyTiles.push(i);
+      }
+
+      if (emptyTiles.length === 0) return;
+
+      const randomEmptyTile = Math.floor(Math.random() * emptyTiles.length);
+      const randomCharacter = randomChar(this.charList);
+
+      this.board[emptyTiles[randomEmptyTile]] = randomCharacter;
+    },
+
+    getTile: function(col, row) {
+      return this.board[row * this.cols + col];
+    },
+
     getTileCoordsFromPoint: function(x, y) {
       return [~~(x / this.tileSize), ~~(y / this.tileSize)];
     },
 
-    update: function(dt) {},
+    update: function(dt) {
+      this.lastAdd += dt;
+
+      if (this.lastAdd >= this.speed) {
+        this.fillRandomTile();
+
+        this.lastAdd = 0;
+      }
+    },
 
     render: function() {
       this.ctx.clearRect(0, 0, this.width, this.height);
@@ -173,11 +204,22 @@
             color = '#f00';
           }
 
+          const tile = this.getTile(i ,j);
+          const x = i * this.tileSize;
+          const y = j * this.tileSize;
+
+          if (tile) {
+            const fontSize = 18;
+            this.ctx.fillStyle = '#000';
+            this.ctx.font = fontSize + 'px Arial';
+            this.ctx.fillText(tile, x + (this.tileSize/2) - (fontSize/2), y + (this.tileSize/2) + (fontSize/2));
+          }
+          
           this.ctx.lineWidth = lineWidth;
           this.ctx.strokeStyle = color;
           this.ctx.strokeRect(
-            i * this.tileSize + offset,
-            j * this.tileSize + offset,
+            x + offset,
+            y + offset,
             this.tileSize - lineWidth,
             this.tileSize - lineWidth
           );
@@ -224,5 +266,6 @@
   document.addEventListener('DOMContentLoaded', function() {
     const game = new Game(document.getElementById('canvas'));
     game.init();
+    window.game = game;
   });
 })();
