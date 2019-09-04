@@ -48,8 +48,7 @@ gulp.task('optimizeImages', () => {
 gulp.task('zip', () => {
   const thirteenKb = 13 * 1024;
 
-  gulp.src('zip/*')
-    .pipe(deleteFiles());
+  del('zip/*');
 
   return gulp.src(`${paths.dist.dir}/**`)
     .pipe(zip('dont-look-back.zip'))
