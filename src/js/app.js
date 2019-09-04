@@ -187,7 +187,7 @@
     this.rows = 8;
     this.cols = 8;
     this.charList = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    this.board = new Array(this.rows * this.cols).fill(false);
+    this.board;
 
     this.lastAdd = 0; // last chacter added (in s ago)
     this.speed = .8; //s
@@ -332,6 +332,7 @@
     onMouseDown: function(e) {
       switch (this.scene) {
         case 'menu':
+          this.board = new Array(this.rows * this.cols).fill(false);
           this.scene = 'playing';
 
           break;
@@ -343,7 +344,6 @@
 
           break;
       }
-      
     },
 
     handleEvent: function(e) {
