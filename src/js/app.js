@@ -216,6 +216,16 @@
       this.board[emptyTiles[randomEmptyTile]] = randomCharacter;
     },
 
+    countEmptyTiles: function() {
+      let count = 0;
+
+      for (let i = this.board.length - 1; i >= 0; i--) {
+        !this.board[i] && count++;
+      }
+
+      return count;
+    },
+
     getTileIndex: function(col, row) {
       return row * this.cols + col;
     },
@@ -240,6 +250,11 @@
         case 'menu':
           break;
         case 'playing':
+          if (this.countEmptyTiles() === 0) {
+            this.scene = 'menu';
+            return;
+          }
+
           this.lastAdd += dt;
 
           if (this.lastAdd >= this.speed) {
