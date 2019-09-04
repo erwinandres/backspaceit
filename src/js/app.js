@@ -7,6 +7,132 @@
       Date.now();
   }
 
+  function randomChar(charlist) {
+    return charlist.charAt(Math.floor(Math.random() * charlist.length));
+  }
+
+  function randomString(length) {
+    let string = '';
+
+    for ( var i = 0; i < length; i++ ) {
+      string += randomChar(characters);
+    }
+
+    return string;
+  }
+
+  function Sprite(url, pos, size, speed, frames, dir, once) {
+      this.pos = pos;
+      this.size = size;
+      this.speed = typeof speed === 'number' ? speed : 0;
+      this.frames = frames;
+      this._index = 0;
+      this.url = url;
+      this.dir = dir || 'horizontal';
+      this.once = once;
+  };
+
+  Sprite.prototype = {
+      update: function(dt) {
+          this._index += this.speed*dt;
+      },
+
+      render: function(ctx) {
+          var frame;
+
+          if(this.speed > 0) {
+              var max = this.frames.length;
+              var idx = Math.floor(this._index);
+              frame = this.frames[idx % max];
+
+              if(this.once && idx >= max) {
+                  this.done = true;
+                  return;
+              }
+          }
+          else {
+              frame = 0;
+          }
+
+
+          var x = this.pos[0];
+          var y = this.pos[1];
+
+          if(this.dir == 'vertical') {
+              y += frame * this.size[1];
+          }
+          else {
+              x += frame * this.size[0];
+          }
+
+          ctx.drawImage(resources.get(this.url),
+                        x, y,
+                        this.size[0], this.size[1],
+                        0, 0,
+                        this.size[0], this.size[1]);
+      }
+  };
+
+  const resourceCache = {};
+  const loading = [];
+  const readyCallbacks = [];
+
+  // Load an image url or an array of image urls
+  function rLoad(urlOrArr) {
+      if(urlOrArr instanceof Array) {
+          urlOrArr.forEach(function(url) {
+              _rLoad(url);
+          });
+      }
+      else {
+          _rLoad(urlOrArr);
+      }
+  }
+
+  function _rLoad(url) {
+      if(resourceCache[url]) {
+          return resourceCache[url];
+      }
+      else {
+          const img = new Image();
+          img.onload = function() {
+              resourceCache[url] = img;
+              
+              if(rIsReady()) {
+                  readyCallbacks.forEach(function(func) { func(); });
+              }
+          };
+          resourceCache[url] = false;
+          img.src = url;
+      }
+  }
+
+  function rGet(url) {
+      return resourceCache[url];
+  }
+
+  function rIsReady() {
+      let ready = true;
+      for(var k in resourceCache) {
+          if(resourceCache.hasOwnProperty(k) &&
+             !resourceCache[k]) {
+              ready = false;
+          }
+      }
+      return ready;
+  }
+
+  function rOnReady(func) {
+      readyCallbacks.push(func);
+  }
+
+  const Resources = { 
+      load: rLoad,
+      get: rGet,
+      onReady: rOnReady,
+      isReady: rIsReady
+  };
+
   function Game(canvas) {
     this.canvas = canvas;
     this.ctx = this.canvas.getContext('2d');
@@ -17,6 +143,7 @@
     this.tileSize = 48;
     this.rows = 8;
     this.cols = 8;
+    this.charList = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
     this.lastTime;
     this.aId;
