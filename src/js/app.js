@@ -133,6 +133,49 @@
       isReady: rIsReady
   };
 
+  const Keyboard = {};
+
+  Keyboard.LEFT = 37;
+  Keyboard.RIGHT = 39;
+  Keyboard.UP = 38;
+  Keyboard.DOWN = 40;
+  Keyboard.BACKSPACE = 8;
+
+  Keyboard._keys = {};
+
+  Keyboard.listenForEvents = function (keys) {
+      window.addEventListener('keydown', this._onKeyDown.bind(this));
+      window.addEventListener('keyup', this._onKeyUp.bind(this));
+
+      keys.forEach(function (key) {
+          this._keys[key] = false;
+      }.bind(this));
+  }
+
+  Keyboard._onKeyDown = function (event) {
+      var keyCode = event.keyCode;
+
+      if (keyCode in this._keys) {
+          event.preventDefault();
+          this._keys[keyCode] = true;
+      }
+  };
+
+  Keyboard._onKeyUp = function (event) {
+      var keyCode = event.keyCode;
+      if (keyCode in this._keys) {
+          event.preventDefault();
+          this._keys[keyCode] = false;
+      }
+  };
+
+  Keyboard.isDown = function (keyCode) {
+      if (!keyCode in this._keys) {
+          throw new Error('Keycode ' + keyCode + ' is not being listened to');
+      }
+      return this._keys[keyCode];
+  };
+
   function Game(canvas) {
     this.canvas = canvas;
     this.ctx = this.canvas.getContext('2d');
@@ -153,6 +196,7 @@
     this.aId;
 
     this.cursorAt = [0, 0];
+    this.backspacePressed = false;
   }
 
   Game.prototype = {
@@ -171,12 +215,20 @@
       this.board[emptyTiles[randomEmptyTile]] = randomCharacter;
     },
 
-    getTile: function(col, row) {
-      return this.board[row * this.cols + col];
+    getTileIndex: function(col, row) {
+      return row * this.cols + col;
+    },
+
+    getTileValue: function(col, row) {
+      return this.board[this.getTileIndex(col, row)];
     },
 
     getTileCoordsFromPoint: function(x, y) {
       return [~~(x / this.tileSize), ~~(y / this.tileSize)];
+    },
+
+    backspace: function() {
+      this.board[this.getTileIndex(this.cursorAt[0], this.cursorAt[1])] = false;
     },
 
     update: function(dt) {
@@ -186,6 +238,15 @@
         this.fillRandomTile();
 
         this.lastAdd = 0;
+      }
+
+      if (Keyboard.isDown(Keyboard.BACKSPACE)) {
+        if (!this.backspacePressed) {
+          this.backspace();
+        }
+        this.backspacePressed = true;
+      } else {
+        this.backspacePressed = false;
       }
     },
 
@@ -204,7 +265,7 @@
             color = '#f00';
           }
 
-          const tile = this.getTile(i ,j);
+          const tile = this.getTileValue(i ,j);
           const x = i * this.tileSize;
           const y = j * this.tileSize;
 
@@ -243,6 +304,9 @@
     },
 
     listen: function() {
+      Keyboard.listenForEvents(
+              [Keyboard.LEFT, Keyboard.RIGHT, Keyboard.UP, Keyboard.DOWN, Keyboard.BACKSPACE]);
+
       this.canvas.addEventListener('mousedown', this);
     },
 
