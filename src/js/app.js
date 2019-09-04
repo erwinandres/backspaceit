@@ -197,6 +197,7 @@
 
     this.cursorAt = [0, 0];
     this.backspacePressed = false;
+    this.scene = 'load';
   }
 
   Game.prototype = {
@@ -232,67 +233,102 @@
     },
 
     update: function(dt) {
-      this.lastAdd += dt;
+      switch (this.scene) {
+        case 'load':
+          if (this.loaded) this.scene = 'menu';
+          break;
+        case 'menu':
+          break;
+        case 'playing':
+          this.lastAdd += dt;
 
-      if (this.lastAdd >= this.speed) {
-        this.fillRandomTile();
+          if (this.lastAdd >= this.speed) {
+            this.fillRandomTile();
 
-        this.lastAdd = 0;
-      }
+            this.lastAdd = 0;
+          }
 
-      if (Keyboard.isDown(Keyboard.BACKSPACE)) {
-        if (!this.backspacePressed) {
-          this.backspace();
-        }
-        this.backspacePressed = true;
-      } else {
-        this.backspacePressed = false;
+          if (Keyboard.isDown(Keyboard.BACKSPACE)) {
+            if (!this.backspacePressed) {
+              this.backspace();
+            }
+            this.backspacePressed = true;
+          } else {
+            this.backspacePressed = false;
+          }
+
+          break;
       }
     },
 
     render: function() {
       this.ctx.clearRect(0, 0, this.width, this.height);
 
-      for (let i = 0; i < this.rows; i++) {
-        for (let j = 0; j < this.cols; j++) {
-          let offset = 0;
-          let lineWidth = 1;
-          let color = '#000';
+      switch (this.scene) {
+        case 'load':
+          this.ctx.fillStyle = '#000';
+          this.ctx.font = '24px Arial';
+          this.ctx.fillText('Loading...', 10, 30);
+          break;
+        case 'menu':
+          this.ctx.fillStyle = '#000';
+          this.ctx.font = '24px Arial';
+          this.ctx.fillText('Touch to start game.', 10, 30);
+          break;
+        case 'playing':
+          for (let i = 0; i < this.rows; i++) {
+            for (let j = 0; j < this.cols; j++) {
+              let offset = 0;
+              let lineWidth = 1;
+              let color = '#000';
 
-          if (i === this.cursorAt[0] && j === this.cursorAt[1]) {
-            offset = 1; 
-            lineWidth = 4;
-            color = '#f00';
+              if (i === this.cursorAt[0] && j === this.cursorAt[1]) {
+                offset = 1; 
+                lineWidth = 4;
+                color = '#f00';
+              }
+
+              const tile = this.getTileValue(i ,j);
+              const x = i * this.tileSize;
+              const y = j * this.tileSize;
+
+              if (tile) {
+                const fontSize = 18;
+                this.ctx.fillStyle = '#000';
+                this.ctx.font = fontSize + 'px Arial';
+                this.ctx.fillText(tile, x + (this.tileSize/2) - (fontSize/2), y + (this.tileSize/2) + (fontSize/2));
+              }
+              
+              this.ctx.lineWidth = lineWidth;
+              this.ctx.strokeStyle = color;
+              this.ctx.strokeRect(
+                x + offset,
+                y + offset,
+                this.tileSize - lineWidth,
+                this.tileSize - lineWidth
+              );
+            }
           }
 
-          const tile = this.getTileValue(i ,j);
-          const x = i * this.tileSize;
-          const y = j * this.tileSize;
-
-          if (tile) {
-            const fontSize = 18;
-            this.ctx.fillStyle = '#000';
-            this.ctx.font = fontSize + 'px Arial';
-            this.ctx.fillText(tile, x + (this.tileSize/2) - (fontSize/2), y + (this.tileSize/2) + (fontSize/2));
-          }
-          
-          this.ctx.lineWidth = lineWidth;
-          this.ctx.strokeStyle = color;
-          this.ctx.strokeRect(
-            x + offset,
-            y + offset,
-            this.tileSize - lineWidth,
-            this.tileSize - lineWidth
-          );
-        }
+          break;
       }
     },
 
     onMouseDown: function(e) {
-      const touchX = e.clientX - this.canvasRect.left;
-      const touchY = e.clientY - this.canvasRect.top;
+      switch (this.scene) {
+        case 'menu':
+          this.scene = 'playing';
 
-      this.cursorAt = this.getTileCoordsFromPoint(touchX, touchY);
+          break;
+        case 'playing':
+          const touchX = e.clientX - this.canvasRect.left;
+          const touchY = e.clientY - this.canvasRect.top;
+
+          this.cursorAt = this.getTileCoordsFromPoint(touchX, touchY);
+
+          break;
+      }
+      
     },
 
     handleEvent: function(e) {
@@ -331,6 +367,7 @@
     init: function() {
       this.lastTime = timeStamp();
       this.listen();
+      this.loaded = true;
       this.loop();
     }
   }
