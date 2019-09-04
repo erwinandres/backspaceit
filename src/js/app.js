@@ -234,8 +234,16 @@
       this.cursorAt = this.getTileCoordsFromPoint(touchX, touchY);
     },
 
+    handleEvent: function(e) {
+      switch (e.type) {
+        case 'mousedown':
+          this.onMouseDown(e);
+          break;
+      }
+    },
+
     listen: function() {
-      this.canvas.addEventListener('mousedown', this.onMouseDown.bind(this));
+      this.canvas.addEventListener('mousedown', this);
     },
 
     loop: function() {
