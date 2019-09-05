@@ -242,7 +242,7 @@
     },
 
     backspace: function() {
-      this.board[this.getTileIndex(this.cursorAt[0], this.cursorAt[1])] = false;
+      this.board[this.getTileIndex(this.cursorAt[0], this.cursorAt[1])] = null;
     },
 
     update: function(dt) {
@@ -341,7 +341,10 @@
     onMouseDown: function(e) {
       switch (this.scene) {
         case 'menu':
-          //this.board = new Array(this.rows * this.cols).fill(false);
+          for (let i = this.board.length - 1; i >= 0; i--) {
+            this.board[i] = null;
+          }
+
           this.scene = 'playing';
 
           break;
