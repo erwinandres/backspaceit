@@ -187,7 +187,7 @@
     this.rows = 8;
     this.cols = 8;
     this.charList = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    this.board;
+    this.board = new Array(this.rows * this.cols);
 
     this.lastAdd = 0; // last chacter added (in s ago)
     this.speed = .8; //s
@@ -279,60 +279,66 @@
     render: function() {
       this.ctx.clearRect(0, 0, this.width, this.height);
 
-      switch (this.scene) {
-        case 'load':
-          this.ctx.fillStyle = '#000';
-          this.ctx.font = '24px Arial';
-          this.ctx.fillText('Loading...', 10, 30);
-          break;
-        case 'menu':
-          this.ctx.fillStyle = '#000';
-          this.ctx.font = '24px Arial';
-          this.ctx.fillText('Touch to start game.', 10, 30);
-          break;
-        case 'playing':
-          for (let i = 0; i < this.rows; i++) {
-            for (let j = 0; j < this.cols; j++) {
-              let offset = 0;
-              let lineWidth = 1;
-              let color = '#000';
+      for (let i = 0; i < this.rows; i++) {
+        for (let j = 0; j < this.cols; j++) {
+          let offset = 0;
+          let lineWidth = 1;
+          let color = '#000';
 
-              if (i === this.cursorAt[0] && j === this.cursorAt[1]) {
-                offset = 1; 
-                lineWidth = 4;
-                color = '#f00';
-              }
-
-              const tile = this.getTileValue(i ,j);
-              const x = i * this.tileSize;
-              const y = j * this.tileSize;
-
-              if (tile) {
-                const fontSize = 18;
-                this.ctx.fillStyle = '#000';
-                this.ctx.font = fontSize + 'px Arial';
-                this.ctx.fillText(tile, x + (this.tileSize/2) - (fontSize/2), y + (this.tileSize/2) + (fontSize/2));
-              }
-              
-              this.ctx.lineWidth = lineWidth;
-              this.ctx.strokeStyle = color;
-              this.ctx.strokeRect(
-                x + offset,
-                y + offset,
-                this.tileSize - lineWidth,
-                this.tileSize - lineWidth
-              );
-            }
+          if (i === this.cursorAt[0] && j === this.cursorAt[1]) {
+            offset = 1; 
+            lineWidth = 4;
+            color = '#f00';
           }
 
-          break;
+          const tile = this.getTileValue(i ,j);
+          const x = i * this.tileSize;
+          const y = j * this.tileSize;
+
+          if (tile) {
+            const fontSize = 18;
+            this.ctx.fillStyle = '#000';
+            this.ctx.font = fontSize + 'px Arial';
+            this.ctx.fillText(tile, x + (this.tileSize/2) - (fontSize/2), y + (this.tileSize/2) + (fontSize/2));
+          }
+          
+          this.ctx.lineWidth = lineWidth;
+          this.ctx.strokeStyle = color;
+          this.ctx.strokeRect(
+            x + offset,
+            y + offset,
+            this.tileSize - lineWidth,
+            this.tileSize - lineWidth
+          );
+        }
+      }
+
+      if (this.scene !== 'playing') {
+        this.ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+        this.ctx.fillRect(0, 0, this.width, this.height);
+
+        this.ctx.fillStyle = '#000';
+        this.ctx.font = '24px Arial';
+
+        let text;
+
+          switch (this.scene) {
+            case 'loading':
+              text = 'Loading...';
+              break;
+            case 'menu':
+              text = 'Press start to play.';
+              break;
+          }
+
+        this.ctx.fillText(text, 10, 30);
       }
     },
 
     onMouseDown: function(e) {
       switch (this.scene) {
         case 'menu':
-          this.board = new Array(this.rows * this.cols).fill(false);
+          //this.board = new Array(this.rows * this.cols).fill(false);
           this.scene = 'playing';
 
           break;
