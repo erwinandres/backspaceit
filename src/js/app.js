@@ -180,7 +180,7 @@
     this.canvas = config.canvas;
     this.scoreEl = config.scoreEl;
     this.levelEl = config.levelEl;
-    this.bestLevelEl = config.bestLevelEl;
+    this.bestScoreEl = config.bestScoreEl;
     this.ctx = this.canvas.getContext('2d');
     this.width = this.canvas.width;
     this.height = this.canvas.height;
@@ -194,6 +194,9 @@
 
     this.lastAdd = 0; // last chacter added (in s ago)
     this.speed = .8; //s
+    this.level = 1;
+    this.score = 0;
+    this.bestScore = 0;
 
     this.lastTime;
     this.aId;
@@ -243,6 +246,25 @@
 
     backspace: function() {
       this.board[this.getTileIndex(this.cursorAt[0], this.cursorAt[1])] = null;
+    },
+
+    updateLevel: function(newLevel) {
+      this.level = newLevel;
+      this.levelEl.innerHTML = this.level;
+    },
+
+    updateScore: function(newScore) {
+      this.score = newScore;
+      this.scoreEl.innerHTML = this.score;
+    },
+
+    updateBestScore: function(newBestScore) {
+      this.bestScore = newBestScore;
+      this.bestScoreEl.innerHTML = this.bestScore;
+    },
+
+    displayUpdatedValue: function(value, el) {
+      el.innerHTML = value;
     },
 
     update: function(dt) {
@@ -341,6 +363,9 @@
     onMouseDown: function(e) {
       switch (this.scene) {
         case 'menu':
+          this.displayUpdatedValue(this.level = 1, this.levelEl);
+          this.displayUpdatedValue(this.score = 0, this.scoreEl);
+
           for (let i = this.board.length - 1; i >= 0; i--) {
             this.board[i] = null;
           }
@@ -392,6 +417,7 @@
     },
 
     init: function() {
+      this.displayUpdatedValue(this.bestScore, this.bestScoreEl);
       this.lastTime = timeStamp();
       this.listen();
       this.loaded = true;
