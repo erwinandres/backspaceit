@@ -195,6 +195,7 @@
     this.lastAdd = 0; // last chacter added (in s ago)
     this.speed = .8; //s
     this.level = 1;
+    this.toNextLevel = 10;
     this.score = 0;
     this.bestScore = 0;
 
@@ -250,6 +251,13 @@
       if (this.board[tile]) {
         this.board[tile] = null;
         this.displayUpdatedValue(this.score += 5, this.scoreEl);
+
+        this.toNextLevel--;
+
+        if (this.toNextLevel <= 0) {
+          this.displayUpdatedValue(this.level++, this.levelEl);
+          this.toNextLevel = 10;
+        }
       }
     },
 
@@ -287,7 +295,7 @@
 
           this.lastAdd += dt;
 
-          if (this.lastAdd >= this.speed) {
+          if (this.lastAdd >= (this.speed - (this.level * 0.05))) {
             this.fillRandomTile();
 
             this.lastAdd = 0;
