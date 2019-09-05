@@ -14,6 +14,15 @@
       margin: 0;
     }
 
+    .app {
+      width: 384px;
+      margin: 0 auto;
+    }
+
+    .title {
+      text-align: center;
+    }
+
     .canvas {
       display: block;
       margin: 0 auto;
@@ -21,7 +30,19 @@
   </style>
 </head>
 <body>
-  <canvas class="canvas" id="canvas" width="384" height="384"></canvas>
+  <div class="app">
+    <h1 class="title">Backspace</h1>
+
+    <div id="info">
+      <ul>
+        <li>Level: <span id="display-level"></span></li>
+        <li>Score: <span id="display-score"></span></li>
+        <li>Best: <span id="display-bestscore"></span></li>
+      </ul>
+    </div>
+    <canvas class="canvas" id="canvas" width="384" height="384"></canvas>
+  </div>
+
   <script src="js/app.js"></script>
 </body>
 </html>

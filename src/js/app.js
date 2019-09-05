@@ -176,8 +176,11 @@
       return this._keys[keyCode];
   };
 
-  function Game(canvas) {
-    this.canvas = canvas;
+  function Game(config) {
+    this.canvas = config.canvas;
+    this.scoreEl = config.scoreEl;
+    this.levelEl = config.levelEl;
+    this.bestLevelEl = config.bestLevelEl;
     this.ctx = this.canvas.getContext('2d');
     this.width = this.canvas.width;
     this.height = this.canvas.height;
@@ -394,7 +397,12 @@
   }
 
   document.addEventListener('DOMContentLoaded', function() {
-    const game = new Game(document.getElementById('canvas'));
+    const game = new Game({
+      canvas: document.getElementById('canvas'),
+      levelEl: document.getElementById('display-level'),
+      scoreEl: document.getElementById('display-score'),
+      bestScoreEl: document.getElementById('display-bestscore')
+    });
     game.init();
     window.game = game;
   });
