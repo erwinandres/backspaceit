@@ -245,7 +245,12 @@
     },
 
     backspace: function() {
-      this.board[this.getTileIndex(this.cursorAt[0], this.cursorAt[1])] = null;
+      const tile = this.getTileIndex(this.cursorAt[0], this.cursorAt[1]); 
+
+      if (this.board[tile]) {
+        this.board[tile] = null;
+        this.displayUpdatedValue(this.score += 5, this.scoreEl);
+      }
     },
 
     updateLevel: function(newLevel) {
