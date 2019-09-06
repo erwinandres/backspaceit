@@ -261,21 +261,6 @@
       }
     },
 
-    updateLevel: function(newLevel) {
-      this.level = newLevel;
-      this.levelEl.innerHTML = this.level;
-    },
-
-    updateScore: function(newScore) {
-      this.score = newScore;
-      this.scoreEl.innerHTML = this.score;
-    },
-
-    updateBestScore: function(newBestScore) {
-      this.bestScore = newBestScore;
-      this.bestScoreEl.innerHTML = this.bestScore;
-    },
-
     displayUpdatedValue: function(value, el) {
       el.innerHTML = value;
     },
