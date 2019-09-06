@@ -190,6 +190,7 @@
     this.rows = 8;
     this.cols = 8;
     this.charList = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    this.specialChars = '*+-/';
     this.board = new Array(this.rows * this.cols);
 
     this.lastAdd = 0; // last chacter added (in s ago)
@@ -198,6 +199,7 @@
     this.toNextLevel = 10;
     this.score = 0;
     this.bestScore = 0;
+    this.specialSharSpawnRate = 1/(this.rows * this.cols);
 
     this.lastTime;
     this.aId;
@@ -218,9 +220,9 @@
       if (emptyTiles.length === 0) return;
 
       const randomEmptyTile = Math.floor(Math.random() * emptyTiles.length);
-      const randomCharacter = randomChar(this.charList);
+      let chars = Math.random() < this.specialSharSpawnRate ? this.specialChars : this.charList;
 
-      this.board[emptyTiles[randomEmptyTile]] = randomCharacter;
+      this.board[emptyTiles[randomEmptyTile]] = randomChar(chars);
     },
 
     countEmptyTiles: function() {
