@@ -11,11 +11,11 @@
     return charlist.charAt(Math.floor(Math.random() * charlist.length));
   }
 
-  function randomString(length) {
+  function randomString(length, charList) {
     let string = '';
 
     for ( var i = 0; i < length; i++ ) {
-      string += randomChar(characters);
+      string += randomChar(charList);
     }
 
     return string;
@@ -182,6 +182,7 @@
     this.scoreEl = config.scoreEl;
     this.levelEl = config.levelEl;
     this.bestScoreEl = config.bestScoreEl;
+    this.luckyStringEl = config.luckyStringEl;
     this.ctx = this.canvas.getContext('2d');
     this.width = this.canvas.width;
     this.height = this.canvas.height;
@@ -191,6 +192,7 @@
     this.rows = 8;
     this.cols = 8;
     this.charList = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    this.specialChars = '*+-/';
     this.board = new Array(this.rows * this.cols);
 
     this.lastAdd = 0; // last chacter added (in s ago)
@@ -199,6 +201,10 @@
     this.toNextLevel = 10;
     this.score = 0;
     this.bestScore = 0;
+    this.specialcharSpawnRate = 1/(this.rows * this.cols);
+    this.luckyString = null;
+    this.luckyStringFound = 0;
+    this.luckyStringBaseLength = 3;
 
     this.lastTime;
     this.aId;
@@ -220,9 +226,9 @@
       if (emptyTiles.length === 0) return;
 
       const randomEmptyTile = Math.floor(Math.random() * emptyTiles.length);
-      const randomCharacter = randomChar(this.charList);
+      let chars = Math.random() < this.specialcharSpawnRate ? this.specialChars : this.charList;
 
-      this.board[emptyTiles[randomEmptyTile]] = randomCharacter;
+      this.board[emptyTiles[randomEmptyTile]] = randomChar(chars);
     },
 
     countEmptyTiles: function() {
@@ -247,11 +253,97 @@
       return [~~(x / this.tileSize), ~~(y / this.tileSize)];
     },
 
+    getTileCoordsByIndex: function(index) {
+      return [index % this.cols, Math.floor(index/this.rows)];
+    },
+
+    clearRow: function(row) {
+      for (let i = 0; i < this.cols; i++) {
+        if (this.board[this.getTileIndex(i, row)]) {
+          this.score += 5;
+          this.board[this.getTileIndex(i, row)] = null;
+        }
+      }
+    },
+
+    clearCol: function(col) {
+      for (let i = 0; i < this.cols; i++) {
+        if (this.board[this.getTileIndex(col, i)]) {
+          this.score += 5;
+          this.board[this.getTileIndex(col, i)] = null;
+        }
+      }
+    },
+
+    clearSlash: function(center) {
+      const a = Math.max(0, center[0] + center[1] - (this.cols - 1));
+      const b = Math.min(center[0] + center[1], this.rows - 1);
+      const start = [a, b];
+      const end = [b, a];
+
+      while (start[0] <= end[0] && start[1] >= end[1]) {
+        const index = this.getTileIndex(start[0], start[1]);
+
+        if (this.board[index]) {
+          this.board[index] = null;
+          this.score += 5;
+        }
+
+        start[0] += 1;
+        start[1] -= 1;
+      }
+    },
+
+    clearBackSlash: function(center) {
+      const sCol = Math.max(0, center[0] - center[1]);
+      const sRow = Math.max(0, center[1] - center[0]);
+      const dCol = (this.cols - 1) - sRow;
+      const dRow = (this.rows - 1) - sCol;
+      const start = [sCol, sRow];
+      const end = [dCol, dRow];
+
+      while (start[0] <= end[0] && start[1] <= end[1]) {
+        const index = this.getTileIndex(start[0], start[1]);
+
+        if (this.board[index]) {
+          this.board[index] = null;
+          this.score += 5;
+        }
+
+        start[0] += 1;
+        start[1] += 1;
+      }
+    },
+
     backspace: function() {
       const tile = this.getTileIndex(this.cursorAt[0], this.cursorAt[1]); 
 
       if (this.board[tile]) {
-        this.board[tile] = null;
+        switch (this.board[tile]) {
+          case '-':
+            this.clearRow(this.cursorAt[1]);
+            break;
+          case '+':
+            this.clearRow(this.cursorAt[1]);
+            this.clearCol(this.cursorAt[0]);
+            break;
+          case '/':
+            this.clearSlash(this.cursorAt);
+            break;
+          case '\\':
+            this.clearBackSlash(this.cursorAt);
+            break;
+          case '*':
+            this.clearRow(this.cursorAt[1]);
+            this.clearCol(this.cursorAt[0]);
+            this.clearSlash(this.cursorAt);
+            this.clearBackSlash(this.cursorAt);
+            break;
+          default:
+            this.board[tile] = null;
+            break;
+        }
+
         this.displayUpdatedValue(this.score += 5, this.scoreEl);
 
         this.toNextLevel--;
@@ -298,6 +390,36 @@
             this.fillRandomTile();
 
             this.lastAdd = 0;
+          }
+
+          const luckyStringStartIndex = this.board.findIndex(char => char === this.luckyString[0]);
+
+          if (luckyStringStartIndex >= 0) {
+            let luckyStringFind = 1;
+
+            for (let i = this.luckyString.length - 1; i >= 0; i--) {
+              if (i !== luckyStringFind) continue;
+              if (this.luckyString[i] === this.board[luckyStringStartIndex + i]) luckyStringFind++;
+            }
+
+            if (luckyStringFind === this.luckyString.length) {
+              // delete lucky string characters
+              for (let i = luckyString.length - 1; i >= 0; i--) {
+                this.board[luckyStringStartIndex + i] = null;
+              }
+
+              this.luckyStringFound++;
+              this.displayUpdatedValue(this.score += 100 * (this.luckyStringFound + 1), this.scoreEl);
+              this.displayUpdatedValue(
+                this.luckyString = randomString(
+                  this.luckyStringBaseLength + this.luckyStringFound,
+                  this.charList
+                ),
+                this.luckyStringEl
+              );
+
+              // TODO: animation
+            }
           }
 
           if (Keyboard.isDown(Keyboard.BACKSPACE)) {
@@ -393,12 +515,18 @@
     onMouseDown: function(e) {
       switch (this.scene) {
         case 'menu':
+          this.luckyStringFound = 0;
           this.displayUpdatedValue(this.level = 1, this.levelEl);
           this.displayUpdatedValue(this.score = 0, this.scoreEl);
 
           for (let i = this.board.length - 1; i >= 0; i--) {
             this.board[i] = null;
           }
+
+          this.displayUpdatedValue(
+            this.luckyString = randomString(this.luckyStringBaseLength, this.charList),
+            this.luckyStringEl
+          );
 
           this.scene = 'playing';
 
@@ -408,7 +536,6 @@
           const touchY = e.clientY - this.canvasRect.top;
 
           this.cursorAt = this.getTileCoordsFromPoint(touchX, touchY);
-
           break;
         case 'pause':
           this.scene = 'playing';
@@ -491,6 +618,7 @@
     const game = new Game({
       canvas: document.getElementById('canvas'),
       levelEl: document.getElementById('display-level'),
+      luckyStringEl: document.getElementById('display-luckystring'),
       scoreEl: document.getElementById('display-score'),
       bestScoreEl: document.getElementById('display-bestscore')
     });
