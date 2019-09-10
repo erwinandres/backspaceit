@@ -423,6 +423,14 @@
       this.canvasRect = this.canvas.getBoundingClientRect();
     },
 
+    onVisibilityChange: function(e) {
+        if (this.scene !== 'playing') return;
+        if (document.hidden || document.webkitHidden || e.type == 'blur' ||
+            document.visibilityState !== 'visible') {
+            this.scene = 'pause';
+        }
+    },
+
     handleEvent: function(e) {
       switch (e.type) {
         case 'mousedown':
@@ -430,6 +438,11 @@
           break;
         case 'resize':
           this.onResize(e);
+          break;
+        case 'visibilitychange':
+        case 'blur':
+        case 'focus':
+          this.onVisibilityChange(e);
           break;
       }
     },
@@ -439,6 +452,11 @@
               [Keyboard.LEFT, Keyboard.RIGHT, Keyboard.UP, Keyboard.DOWN, Keyboard.BACKSPACE, Keyboard.ESC]);
 
       this.canvas.addEventListener('mousedown', this);
+
+      document.addEventListener('visibilitychange', this);
+      window.addEventListener('blur', this);
+      window.addEventListener('focus', this);
+
       window.addEventListener('resize', this);
     },
 
