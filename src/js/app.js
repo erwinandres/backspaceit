@@ -140,6 +140,7 @@
   Keyboard.UP = 38;
   Keyboard.DOWN = 40;
   Keyboard.BACKSPACE = 8;
+  Keyboard.ESC = 27;
 
   Keyboard._keys = {};
 
@@ -204,6 +205,7 @@
 
     this.cursorAt = [0, 0];
     this.backspacePressed = false;
+    this.pauseButtonPressed = false;
     this.scene = 'load';
   }
 
@@ -279,6 +281,17 @@
             return;
           }
 
+          if (Keyboard.isDown(Keyboard.ESC)) {
+            if (!this.pauseButtonPressed) {
+              this.scene = 'pause';
+            }
+
+            this.pauseButtonPressed = true;
+            return;
+          } else {
+            this.pauseButtonPressed = false;
+          }
+
           this.lastAdd += dt;
 
           if (this.lastAdd >= (this.speed - (this.level * 0.05))) {
@@ -294,6 +307,18 @@
             this.backspacePressed = true;
           } else {
             this.backspacePressed = false;
+          }
+
+          break;
+        case 'pause':
+          if (Keyboard.isDown(Keyboard.ESC)) {
+            if (!this.pauseButtonPressed) {
+              this.scene = 'playing';
+            }
+            this.pauseButtonPressed = true;
+            return;
+          } else {
+            this.pauseButtonPressed = false;
           }
 
           break;
@@ -356,6 +381,9 @@
             case 'gameover':
               text = 'Game Over';
               break;
+            case 'pause':
+              text = 'Paused';
+              break;
           }
 
         this.ctx.fillText(text, 10, 30);
@@ -382,6 +410,9 @@
           this.cursorAt = this.getTileCoordsFromPoint(touchX, touchY);
 
           break;
+        case 'pause':
+          this.scene = 'playing';
+          break;
         case 'gameover':
           this.scene = 'menu';
           break;
@@ -398,7 +429,7 @@
 
     listen: function() {
       Keyboard.listenForEvents(
-              [Keyboard.LEFT, Keyboard.RIGHT, Keyboard.UP, Keyboard.DOWN, Keyboard.BACKSPACE]);
+              [Keyboard.LEFT, Keyboard.RIGHT, Keyboard.UP, Keyboard.DOWN, Keyboard.BACKSPACE, Keyboard.ESC]);
 
       this.canvas.addEventListener('mousedown', this);
     },
