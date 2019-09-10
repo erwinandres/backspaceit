@@ -419,10 +419,17 @@
       }
     },
 
+    onResize: function(e) {
+      this.canvasRect = this.canvas.getBoundingClientRect();
+    },
+
     handleEvent: function(e) {
       switch (e.type) {
         case 'mousedown':
           this.onMouseDown(e);
+          break;
+        case 'resize':
+          this.onResize(e);
           break;
       }
     },
@@ -432,6 +439,7 @@
               [Keyboard.LEFT, Keyboard.RIGHT, Keyboard.UP, Keyboard.DOWN, Keyboard.BACKSPACE, Keyboard.ESC]);
 
       this.canvas.addEventListener('mousedown', this);
+      window.addEventListener('resize', this);
     },
 
     loop: function() {
