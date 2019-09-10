@@ -271,10 +271,11 @@
           if (this.loaded) this.scene = 'menu';
           break;
         case 'menu':
+        case 'gameover':
           break;
         case 'playing':
           if (this.countEmptyTiles() === 0) {
-            this.scene = 'menu';
+            this.scene = 'gameover';
             return;
           }
 
@@ -352,6 +353,9 @@
             case 'menu':
               text = 'Press start to play.';
               break;
+            case 'gameover':
+              text = 'Game Over';
+              break;
           }
 
         this.ctx.fillText(text, 10, 30);
@@ -377,6 +381,9 @@
 
           this.cursorAt = this.getTileCoordsFromPoint(touchX, touchY);
 
+          break;
+        case 'gameover':
+          this.scene = 'menu';
           break;
       }
     },
