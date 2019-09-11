@@ -608,7 +608,7 @@
             this.displayUpdatedValue(this.score = 0, this.scoreEl);
 
             for (let i = this.board.length - 1; i >= 0; i--) {
-              this.board[i] = null;
+              this.board[i] = Math.random() > 0.15 ? null : randomChar(this.charList);
             }
 
             this.displayUpdatedValue(
