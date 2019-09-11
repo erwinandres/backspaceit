@@ -217,6 +217,9 @@
     this.levelEl = config.levelEl;
     this.bestScoreEl = config.bestScoreEl;
     this.luckyStringEl = config.luckyStringEl;
+    this.backspaceButtonEl = config.backspaceButtonEl;
+    this.escButtonEl = config.escButtonEl;
+
     this.ctx = this.canvas.getContext('2d');
     this.width = this.canvas.width;
     this.height = this.canvas.height;
@@ -674,6 +677,20 @@
       Keyboard.listenForEvents(
               [Keyboard.LEFT, Keyboard.RIGHT, Keyboard.UP, Keyboard.DOWN, Keyboard.BACKSPACE, Keyboard.ESC]);
 
+      this.escButtonEl.addEventListener('click', function() {
+        if (this.scene === 'playing') {
+          this.scene = 'pause';
+        } else if (this.scene === 'pause') {
+          this.scene = 'playing';
+        }
+      }.bind(this));
+
+      this.backspaceButtonEl.addEventListener('click', function() {
+        if (this.scene === 'playing') {
+          this.backspace();
+        }
+      }.bind(this));
+
       this.canvas.addEventListener('mousedown', this);
       this.canvas.addEventListener('mouseup', this);
 
@@ -723,7 +740,9 @@
       levelEl: document.getElementById('display-level'),
       luckyStringEl: document.getElementById('display-luckystring'),
       scoreEl: document.getElementById('display-score'),
-      bestScoreEl: document.getElementById('display-bestscore')
+      bestScoreEl: document.getElementById('display-bestscore'),
+      backspaceButtonEl: document.getElementById('backspace-button'),
+      escButtonEl: document.getElementById('esc-button')
     });
     game.load([
       'img/play.png',
