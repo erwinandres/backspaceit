@@ -21,58 +21,6 @@
     return string;
   }
 
-  function Sprite(url, pos, size, speed, frames, dir, once) {
-      this.pos = pos;
-      this.size = size;
-      this.speed = typeof speed === 'number' ? speed : 0;
-      this.frames = frames;
-      this._index = 0;
-      this.url = url;
-      this.dir = dir || 'horizontal';
-      this.once = once;
-  };
-
-  Sprite.prototype = {
-      update: function(dt) {
-          this._index += this.speed*dt;
-      },
-
-      render: function(ctx) {
-          var frame;
-
-          if(this.speed > 0) {
-              var max = this.frames.length;
-              var idx = Math.floor(this._index);
-              frame = this.frames[idx % max];
-
-              if(this.once && idx >= max) {
-                  this.done = true;
-                  return;
-              }
-          }
-          else {
-              frame = 0;
-          }
-
-
-          var x = this.pos[0];
-          var y = this.pos[1];
-
-          if(this.dir == 'vertical') {
-              y += frame * this.size[1];
-          }
-          else {
-              x += frame * this.size[0];
-          }
-
-          ctx.drawImage(resources.get(this.url),
-                        x, y,
-                        this.size[0], this.size[1],
-                        0, 0,
-                        this.size[0], this.size[1]);
-      }
-  };
-
   const resourceCache = {};
   const loading = [];
   const readyCallbacks = [];
@@ -133,6 +81,58 @@
       isReady: rIsReady
   };
 
+  function Sprite(url, pos, size, speed, frames, dir, once) {
+      this.pos = pos;
+      this.size = size;
+      this.speed = typeof speed === 'number' ? speed : 0;
+      this.frames = frames;
+      this._index = 0;
+      this.url = url;
+      this.dir = dir || 'horizontal';
+      this.once = once;
+  };
+
+  Sprite.prototype = {
+      update: function(dt) {
+          this._index += this.speed*dt;
+      },
+
+      render: function(ctx) {
+          var frame;
+
+          if(this.speed > 0) {
+              var max = this.frames.length;
+              var idx = Math.floor(this._index);
+              frame = this.frames[idx % max];
+
+              if(this.once && idx >= max) {
+                  this.done = true;
+                  return;
+              }
+          }
+          else {
+              frame = 0;
+          }
+
+
+          var x = this.pos[0];
+          var y = this.pos[1];
+
+          if(this.dir == 'vertical') {
+              y += frame * this.size[1];
+          }
+          else {
+              x += frame * this.size[0];
+          }
+
+          ctx.drawImage(Resources.get(this.url),
+                        x, y,
+                        this.size[0], this.size[1],
+                        0, 0,
+                        this.size[0], this.size[1]);
+      }
+  };
+
   const Keyboard = {};
 
   Keyboard.LEFT = 37;
@@ -177,6 +177,33 @@
       return this._keys[keyCode];
   };
 
+  function renderEntity(ctx, entity, sizeAdjustmentRatio, sprite) {
+    sizeAdjustmentRatio = sizeAdjustmentRatio || 1;
+    sprite = sprite || entity.sprite;
+
+    const scale = entity.scale || 1;
+
+    ctx.setTransform(scale / sizeAdjustmentRatio, 0, 0, scale / sizeAdjustmentRatio, entity.x / sizeAdjustmentRatio, entity.y / sizeAdjustmentRatio);
+    sprite.render(ctx);
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+  }
+
+  function Button(sprites, x, y, w, h, initialState) {
+    this.x = x;
+    this.y = y;
+    this.w = w;
+    this.h = h;
+
+    this.state = initialState;
+    this.sprites = sprites;
+  }
+
+  Button.prototype = {
+    render: function(ctx) {
+      renderEntity(ctx, this, 1, this.sprites[this.state]);
+    }
+  }
+
   function Game(config) {
     this.canvas = config.canvas;
     this.scoreEl = config.scoreEl;
@@ -213,6 +240,34 @@
     this.backspacePressed = false;
     this.pauseButtonPressed = false;
     this.scene = 'load';
+
+    this.startButton = new Button(
+      [new Sprite('img/play.png', [0, 0], [64, 32])],
+      (this.width/2) - 32, (this.height/2) - 16,
+      64, 32,
+      0
+    );
+
+    this.escButton = new Button(
+      [new Sprite('img/esc.png', [0, 0], [32, 32])],
+      (this.width/2) - 48, (this.height/2) - 16,
+      32, 32,
+      0
+    );
+
+    this.exitButton = new Button(
+      [new Sprite('img/exit.png', [0, 0], [64, 32])],
+      (this.width/2) + 16, (this.height/2) - 16,
+      64, 32,
+      0
+    );
+
+    this.shareButton = new Button(
+      [new Sprite('img/share.png', [0, 0], [64, 32])],
+      (this.width/2) - 64, (this.height/2) - 16,
+      64, 32,
+      0
+    );
   }
 
   Game.prototype = {
@@ -491,57 +546,92 @@
         this.ctx.fillStyle = '#000';
         this.ctx.font = '24px Arial';
 
-        let text;
+        let text = false;
 
-          switch (this.scene) {
-            case 'loading':
-              text = 'Loading...';
-              break;
-            case 'menu':
-              text = 'Press start to play.';
-              break;
-            case 'gameover':
-              text = 'Game Over';
-              break;
-            case 'pause':
-              text = 'Paused';
-              break;
-          }
+        switch (this.scene) {
+          case 'loading':
+            text = 'Loading...';
+            break;
+          case 'menu':
+            text = 'Press start to play.';
+            this.startButton.render(this.ctx);
+            break;
+          case 'gameover':
+            text = 'Game Over';
+            this.shareButton.render(this.ctx);
+            this.exitButton.render(this.ctx);
 
-        this.ctx.fillText(text, 10, 30);
+            break;
+          case 'pause':
+            text = 'Paused';
+            this.escButton.render(this.ctx);
+            this.exitButton.render(this.ctx);
+            break;
+        }
+
+        text && this.ctx.fillText(text, 10, 30);
       }
     },
 
     onMouseDown: function(e) {
+      const touchX = e.clientX - this.canvasRect.left;
+      const touchY = e.clientY - this.canvasRect.top;
+
       switch (this.scene) {
         case 'menu':
-          this.luckyStringFound = 0;
-          this.displayUpdatedValue(this.level = 1, this.levelEl);
-          this.displayUpdatedValue(this.score = 0, this.scoreEl);
+        case 'pause':
+        case 'gameover':
+          break;
+        case 'playing':
+          this.cursorAt = this.getTileCoordsFromPoint(touchX, touchY);
+          break;
+      }
+    },
 
-          for (let i = this.board.length - 1; i >= 0; i--) {
-            this.board[i] = null;
+    onMouseUp: function(e) {
+      const touchX = e.clientX - this.canvasRect.left;
+      const touchY = e.clientY - this.canvasRect.top;
+
+      switch (this.scene) {
+        case 'menu':
+          if (touchX > this.startButton.x && touchX < this.startButton.x + this.startButton.w &&
+            touchY > this.startButton.y && touchY < this.startButton.y + this.startButton.h) {
+            this.luckyStringFound = 0;
+            this.displayUpdatedValue(this.level = 1, this.levelEl);
+            this.displayUpdatedValue(this.score = 0, this.scoreEl);
+
+            for (let i = this.board.length - 1; i >= 0; i--) {
+              this.board[i] = null;
+            }
+
+            this.displayUpdatedValue(
+              this.luckyString = randomString(this.luckyStringBaseLength, this.charList),
+              this.luckyStringEl
+            );
+
+            this.scene = 'playing';
           }
-
-          this.displayUpdatedValue(
-            this.luckyString = randomString(this.luckyStringBaseLength, this.charList),
-            this.luckyStringEl
-          );
-
-          this.scene = 'playing';
 
           break;
         case 'playing':
-          const touchX = e.clientX - this.canvasRect.left;
-          const touchY = e.clientY - this.canvasRect.top;
-
-          this.cursorAt = this.getTileCoordsFromPoint(touchX, touchY);
           break;
         case 'pause':
-          this.scene = 'playing';
+          if (touchX > this.escButton.x && touchX < this.escButton.x + this.escButton.w &&
+            touchY > this.escButton.y && touchY < this.escButton.y + this.escButton.h) {
+            this.scene = 'playing';
+          } else if (touchX > this.exitButton.x && touchX < this.exitButton.x + this.exitButton.w &&
+            touchY > this.exitButton.y && touchY < this.exitButton.y + this.exitButton.h) {
+            this.scene = 'menu';
+          }
           break;
         case 'gameover':
-          this.scene = 'menu';
+          if (touchX > this.exitButton.x && touchX < this.exitButton.x + this.exitButton.w &&
+            touchY > this.exitButton.y && touchY < this.exitButton.y + this.exitButton.h) {
+            this.scene = 'menu';
+          } else if (touchX > this.shareButton.x && touchX < this.shareButton.x + this.shareButton.w &&
+            touchY > this.shareButton.y && touchY < this.shareButton.y + this.shareButton.h) {
+            // Share
+          }
           break;
       }
     },
@@ -563,6 +653,9 @@
         case 'mousedown':
           this.onMouseDown(e);
           break;
+        case 'mouseup':
+          this.onMouseUp(e);
+          break;
         case 'resize':
           this.onResize(e);
           break;
@@ -579,12 +672,20 @@
               [Keyboard.LEFT, Keyboard.RIGHT, Keyboard.UP, Keyboard.DOWN, Keyboard.BACKSPACE, Keyboard.ESC]);
 
       this.canvas.addEventListener('mousedown', this);
+      this.canvas.addEventListener('mouseup', this);
 
       document.addEventListener('visibilitychange', this);
       window.addEventListener('blur', this);
       window.addEventListener('focus', this);
 
       window.addEventListener('resize', this);
+    },
+
+    load: function(assets) {
+      Resources.load(assets);
+      Resources.onReady(function() {
+          this.loaded = true;
+      }.bind(this));
     },
 
     loop: function() {
@@ -609,7 +710,6 @@
       this.displayUpdatedValue(this.bestScore, this.bestScoreEl);
       this.lastTime = timeStamp();
       this.listen();
-      this.loaded = true;
       this.loop();
     }
   }
@@ -622,6 +722,12 @@
       scoreEl: document.getElementById('display-score'),
       bestScoreEl: document.getElementById('display-bestscore')
     });
+    game.load([
+      'img/play.png',
+      'img/exit.png',
+      'img/esc.png',
+      'img/share.png'
+    ]);
     game.init();
     window.game = game;
   });
