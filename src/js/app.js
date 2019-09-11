@@ -199,6 +199,13 @@
   }
 
   Button.prototype = {
+    hover: function(point) {
+      return point[0] > this.x &&
+        point[0] < this.x + this.w &&
+        point[1] > this.y &&
+        point[1] < this.y + this.h;
+    },
+
     render: function(ctx) {
       renderEntity(ctx, this, 1, this.sprites[this.state]);
     }
@@ -227,6 +234,7 @@
     this.level = 1;
     this.toNextLevel = 10;
     this.score = 0;
+    this.scorePerTile = 1;
     this.bestScore = 0;
     this.specialcharSpawnRate = 1/(this.rows * this.cols);
     this.luckyString = null;
@@ -315,7 +323,7 @@
     clearRow: function(row) {
       for (let i = 0; i < this.cols; i++) {
         if (this.board[this.getTileIndex(i, row)]) {
-          this.score += 5;
+          this.score += this.scorePerTile;
           this.board[this.getTileIndex(i, row)] = null;
         }
       }
@@ -324,7 +332,7 @@
     clearCol: function(col) {
       for (let i = 0; i < this.cols; i++) {
         if (this.board[this.getTileIndex(col, i)]) {
-          this.score += 5;
+          this.score += this.scorePerTile;
           this.board[this.getTileIndex(col, i)] = null;
         }
       }
@@ -341,7 +349,7 @@
 
         if (this.board[index]) {
           this.board[index] = null;
-          this.score += 5;
+          this.score += this.scorePerTile;
         }
 
         start[0] += 1;
@@ -362,7 +370,7 @@
 
         if (this.board[index]) {
           this.board[index] = null;
-          this.score += 5;
+          this.score += this.scorePerTile;
         }
 
         start[0] += 1;
@@ -399,7 +407,7 @@
             break;
         }
 
-        this.displayUpdatedValue(this.score += 5, this.scoreEl);
+        this.displayUpdatedValue(this.score += this.scorePerTile, this.scoreEl);
 
         this.toNextLevel--;
 
@@ -464,7 +472,7 @@
               }
 
               this.luckyStringFound++;
-              this.displayUpdatedValue(this.score += 100 * (this.luckyStringFound + 1), this.scoreEl);
+              this.displayUpdatedValue(this.score += 35 * (this.luckyStringFound + 1), this.scoreEl);
               this.displayUpdatedValue(
                 this.luckyString = randomString(
                   this.luckyStringBaseLength + this.luckyStringFound,
@@ -594,8 +602,7 @@
 
       switch (this.scene) {
         case 'menu':
-          if (touchX > this.startButton.x && touchX < this.startButton.x + this.startButton.w &&
-            touchY > this.startButton.y && touchY < this.startButton.y + this.startButton.h) {
+          if (this.startButton.hover([touchX, touchY])) {
             this.luckyStringFound = 0;
             this.displayUpdatedValue(this.level = 1, this.levelEl);
             this.displayUpdatedValue(this.score = 0, this.scoreEl);
@@ -616,20 +623,16 @@
         case 'playing':
           break;
         case 'pause':
-          if (touchX > this.escButton.x && touchX < this.escButton.x + this.escButton.w &&
-            touchY > this.escButton.y && touchY < this.escButton.y + this.escButton.h) {
+          if (this.escButton.hover([touchX, touchY])) {
             this.scene = 'playing';
-          } else if (touchX > this.exitButton.x && touchX < this.exitButton.x + this.exitButton.w &&
-            touchY > this.exitButton.y && touchY < this.exitButton.y + this.exitButton.h) {
+          } else if (this.exitButton.hover([touchX, touchY])) {
             this.scene = 'menu';
           }
           break;
         case 'gameover':
-          if (touchX > this.exitButton.x && touchX < this.exitButton.x + this.exitButton.w &&
-            touchY > this.exitButton.y && touchY < this.exitButton.y + this.exitButton.h) {
+          if (this.exitButton.hover([touchX, touchY])) {
             this.scene = 'menu';
-          } else if (touchX > this.shareButton.x && touchX < this.shareButton.x + this.shareButton.w &&
-            touchY > this.shareButton.y && touchY < this.shareButton.y + this.shareButton.h) {
+          } else if (this.shareButton.hover([touchX, touchY])) {
             // Share
           }
           break;
