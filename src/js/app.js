@@ -682,6 +682,7 @@
             this.scene = 'menu';
           } else if (this.shareButton.hover([touchX, touchY])) {
             // Share
+            window.open('https://twitter.com/share?text=I scored ' + this.score + ' points on Backspace.&hashtags=backspaceGame,js13kGames&url=' + location.href);
           }
           break;
       }
