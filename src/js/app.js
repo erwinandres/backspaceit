@@ -253,28 +253,40 @@
     this.scene = 'load';
 
     this.startButton = new Button(
-      [new Sprite('img/play.png', [0, 0], [64, 32])],
+      [
+        new Sprite('img/button-sprite.png', [0, 0], [64, 32]),
+        new Sprite('img/button-sprite.png', [64, 0], [64, 32])
+      ],
       (this.width/2) - 32, (this.height/2) - 16,
       64, 32,
       0
     );
 
     this.escButton = new Button(
-      [new Sprite('img/esc.png', [0, 0], [32, 32])],
+      [
+        new Sprite('img/button-sprite.png', [0, 96], [32, 32]),
+        new Sprite('img/button-sprite.png', [32, 96], [32, 32])
+      ],
       (this.width/2) - 48, (this.height/2) - 16,
       32, 32,
       0
     );
 
     this.exitButton = new Button(
-      [new Sprite('img/exit.png', [0, 0], [64, 32])],
+      [
+        new Sprite('img/button-sprite.png', [0, 32], [64, 32]),
+        new Sprite('img/button-sprite.png', [64, 32], [64, 32])
+      ],
       (this.width/2) + 16, (this.height/2) - 16,
       64, 32,
       0
     );
 
     this.shareButton = new Button(
-      [new Sprite('img/share.png', [0, 0], [64, 32])],
+      [
+        new Sprite('img/button-sprite.png', [0, 64], [64, 32]),
+        new Sprite('img/button-sprite.png', [64, 64], [64, 32])
+      ],
       (this.width/2) - 64, (this.height/2) - 16,
       64, 32,
       0
@@ -594,8 +606,25 @@
 
       switch (this.scene) {
         case 'menu':
+          if (this.startButton.hover([touchX, touchY])) {
+            this.startButton.state = 1;
+          }
+          break;
         case 'pause':
+          if (this.escButton.hover([touchX, touchY])) {
+            this.escButton.state = 1;
+          } else if (this.exitButton.hover([touchX, touchY])) {
+            this.exitButton.state = 1;
+          }
+
+          break;
         case 'gameover':
+          if (this.shareButton.hover([touchX, touchY])) {
+            this.shareButton.state = 1;
+          } else if (this.exitButton.hover([touchX, touchY])) {
+            this.exitButton.state = 1;
+          }
+
           break;
         case 'playing':
           this.cursorAt = this.getTileCoordsFromPoint(touchX, touchY);
@@ -611,6 +640,10 @@
       const touchX = x - this.canvasRect.left;
       const touchY = y - this.canvasRect.top;
 
+      this.startButton.state = 0;
+      this.escButton.state = 0;
+      this.exitButton.state = 0;
+      this.shareButton.state = 0;
       switch (this.scene) {
         case 'menu':
           if (this.startButton.hover([touchX, touchY])) {
@@ -753,10 +786,7 @@
       escButtonEl: document.getElementById('esc-button')
     });
     game.load([
-      'img/play.png',
-      'img/exit.png',
-      'img/esc.png',
-      'img/share.png'
+      'img/button-sprite.png'
     ]);
     game.init();
     window.game = game;
