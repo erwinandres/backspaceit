@@ -52,6 +52,17 @@
       display: block;
       text-align: center;
     }
+
+
+    .controls {
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .controlButton {
+      min-height: 48px;
+      min-width: 48px;
+    }
   </style>
 </head>
 <body>
@@ -67,9 +78,9 @@
       </ul>
     </div>
     <canvas class="canvas" id="canvas" width="384" height="384"></canvas>
-    <div id="controls">
-      <button id="esc-button">esc</button>
-      <button id="backspace-button">&larr; Backspace</button>
+    <div class="controls" id="controls">
+      <button class="controlButton" id="esc-button">esc</button>
+      <button class="controlButton" id="backspace-button">&larr; Backspace</button>
     </div>
   </div>
 
