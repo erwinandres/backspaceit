@@ -585,8 +585,12 @@
     },
 
     onMouseDown: function(e) {
-      const touchX = e.clientX - this.canvasRect.left;
-      const touchY = e.clientY - this.canvasRect.top;
+      const touch = e.changedTouches && e.changedTouche[0];
+      const x = touch ? touch.clientX : e.clientX;
+      const y = touch ? touch.clientY : e.clientY;
+
+      const touchX = x - this.canvasRect.left;
+      const touchY = y - this.canvasRect.top;
 
       switch (this.scene) {
         case 'menu':
@@ -600,8 +604,12 @@
     },
 
     onMouseUp: function(e) {
-      const touchX = e.clientX - this.canvasRect.left;
-      const touchY = e.clientY - this.canvasRect.top;
+      const touch = e.changedTouches && e.changedTouche[0];
+      const x = touch ? touch.clientX : e.clientX;
+      const y = touch ? touch.clientY : e.clientY;
+
+      const touchX = x - this.canvasRect.left;
+      const touchY = y - this.canvasRect.top;
 
       switch (this.scene) {
         case 'menu':
