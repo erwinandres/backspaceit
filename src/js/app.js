@@ -581,7 +581,6 @@
             text = 'Loading...';
             break;
           case 'menu':
-            text = 'Press start to play.';
             this.startButton.render(this.ctx);
             break;
           case 'gameover':
