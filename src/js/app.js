@@ -225,6 +225,7 @@
     this.height = this.canvas.height;
     this.canvasRect = this.canvas.getBoundingClientRect();
 
+    this.db = 'erwBckspcKyDb';
     this.tileSize = 48;
     this.rows = 8;
     this.cols = 8;
@@ -448,6 +449,10 @@
         case 'playing':
           if (this.countEmptyTiles() === 0) {
             this.scene = 'gameover';
+            if (this.score > this.bestScore) {
+              this.displayUpdatedValue(this.bestScore = this.score, this.bestScoreEl);
+              localStorage.setItem(this.db, this.bestScore);
+            }
             return;
           }
 
@@ -768,7 +773,10 @@
     },
 
     init: function() {
-      this.displayUpdatedValue(this.bestScore, this.bestScoreEl);
+      this.displayUpdatedValue(
+        this.bestScore = localStorage.getItem(this.db) || 0,
+        this.bestScoreEl
+      );
       this.lastTime = timeStamp();
       this.listen();
       this.loop();
