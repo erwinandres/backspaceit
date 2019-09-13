@@ -244,7 +244,7 @@ zzfx_v=.5;zzfx_x=new AudioContext;zzfx=(e,f,a,b=1,d=.1,g=0,h=0,k=0,l=0)=>{let S=
     this.rows = 8;
     this.cols = 8;
     this.charList = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    this.specialChars = '*+-/?';
+    this.specialChars = '*+-/\\?';
     this.board = new Array(this.rows * this.cols);
 
     this.lastAdd = 0; // last chacter added (in s ago)
