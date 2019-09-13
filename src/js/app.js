@@ -775,7 +775,7 @@ zzfx_v=.5;zzfx_x=new AudioContext;zzfx=(e,f,a,b=1,d=.1,g=0,h=0,k=0,l=0)=>{let S=
               this.level +
               ' and scored ' +
               this.score +
-              ' points on "Backspace".&hashtags=backspaceItGame,js13kGames&url=' +
+              ' points on "Backspace It".&hashtags=backspaceItGame,js13kGames&url=' +
               location.href
             );
           }
