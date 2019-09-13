@@ -313,6 +313,22 @@ zzfx_v=.5;zzfx_x=new AudioContext;zzfx=(e,f,a,b=1,d=.1,g=0,h=0,k=0,l=0)=>{let S=
       96, 48,
       0
     );
+
+    this.gameOverText = {
+      w: 192,
+      h: 48
+    }
+    this.gameOverText.x = (this.width/2) - (this.gameOverText.w/2);
+    this.gameOverText.y = 96;
+    this.gameOverText.sprite = new Sprite('text.png', [0, 0], [192, 48]);
+
+    this.pauseText = {
+      w: 192,
+      h: 48
+    }
+    this.pauseText.x = (this.width/2) - (this.pauseText.w/2);
+    this.pauseText.y = 96;
+    this.pauseText.sprite = new Sprite('text.png', [0, 48], [192, 48]);
   }
 
   Game.prototype = {
@@ -651,15 +667,18 @@ zzfx_v=.5;zzfx_x=new AudioContext;zzfx=(e,f,a,b=1,d=.1,g=0,h=0,k=0,l=0)=>{let S=
             this.startButton.render(this.ctx);
             break;
           case 'gameover':
-            text = 'Game Over';
             this.shareButton.render(this.ctx);
             this.exitButton.render(this.ctx);
 
+            renderEntity(this.ctx, this.gameOverText);
+
             break;
           case 'pause':
-            text = 'Paused';
             this.escButton.render(this.ctx);
             this.exitButton.render(this.ctx);
+
+            renderEntity(this.ctx, this.pauseText);
+
             break;
         }
 
@@ -872,7 +891,8 @@ zzfx_v=.5;zzfx_x=new AudioContext;zzfx=(e,f,a,b=1,d=.1,g=0,h=0,k=0,l=0)=>{let S=
     });
     game.load([
       'button-sprite.png',
-      'font.png'
+      'font.png',
+      'text.png'
     ]);
     game.init();
   });
