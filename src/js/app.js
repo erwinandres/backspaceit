@@ -482,6 +482,41 @@ zzfx_v=.5;zzfx_x=new AudioContext;zzfx=(e,f,a,b=1,d=.1,g=0,h=0,k=0,l=0)=>{let S=
       }
     },
 
+    searchLuckyString: function() {
+      let indexFound = [];
+      let currentLSIndex = 0;
+
+      for (let i = 0; i < this.board.length; i++) {
+        const tile = this.board[i];
+
+        if (tile === this.luckyString[currentLSIndex]) {
+          indexFound.push(i);
+          currentLSIndex ++;
+        } else {
+          currentLSIndex = 0;
+          indexFound = [];
+        }
+
+        if (indexFound.length === this.luckyString.length) {
+          for (let j = 0; j < indexFound.length; j++) {
+            this.board[indexFound[j]] = null;
+          }
+
+          this.luckyStringFound++;
+          this.displayUpdatedValue(this.score += 35 * (this.luckyStringFound + 1), this.scoreEl);
+          this.displayUpdatedValue(
+            this.luckyString = randomString(
+              this.luckyStringBaseLength + this.luckyStringFound,
+              this.charList
+            ),
+            this.luckyStringEl
+          );
+
+          zzfx(1,.1,29,.9,.29,.3,0,13,.69); // ZzFX 9289
+        }
+      }
+    },
+
     displayUpdatedValue: function(value, el) {
       el.innerHTML = value;
     },
@@ -522,40 +557,11 @@ zzfx_v=.5;zzfx_x=new AudioContext;zzfx=(e,f,a,b=1,d=.1,g=0,h=0,k=0,l=0)=>{let S=
 
           if (this.lastAdd >= (this.speed - (this.level * 0.05))) {
             this.fillRandomTile();
+            this.searchLuckyString();
+
             this.lastAdd = 0;
 
             zzfx(.8,.1,190,.05,.06,1.8,.5,0,.31); // ZzFX 62656
-          }
-
-          const luckyStringStartIndex = this.board.findIndex(char => char === this.luckyString[0]);
-
-          if (luckyStringStartIndex >= 0) {
-            let luckyStringFind = 1;
-
-            for (let i = this.luckyString.length - 1; i >= 0; i--) {
-              if (i !== luckyStringFind) continue;
-              if (this.luckyString[i] === this.board[luckyStringStartIndex + i]) luckyStringFind++;
-            }
-
-            if (luckyStringFind === this.luckyString.length) {
-              // delete lucky string characters
-              for (let i = luckyString.length - 1; i >= 0; i--) {
-                this.board[luckyStringStartIndex + i] = null;
-              }
-
-              this.luckyStringFound++;
-              this.displayUpdatedValue(this.score += 35 * (this.luckyStringFound + 1), this.scoreEl);
-              this.displayUpdatedValue(
-                this.luckyString = randomString(
-                  this.luckyStringBaseLength + this.luckyStringFound,
-                  this.charList
-                ),
-                this.luckyStringEl
-              );
-
-              zzfx(1,.1,29,.9,.29,.3,0,13,.69); // ZzFX 9289
-              // TODO: animation
-            }
           }
 
           if (Keyboard.isDown(Keyboard.BACKSPACE)) {
