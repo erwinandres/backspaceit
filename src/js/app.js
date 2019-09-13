@@ -97,8 +97,9 @@
           this._index += this.speed*dt;
       },
 
-      render: function(ctx) {
+      render: function(ctx, dSize) {
           var frame;
+          dSize = dSize || this.size;
 
           if(this.speed > 0) {
               var max = this.frames.length;
@@ -109,11 +110,9 @@
                   this.done = true;
                   return;
               }
-          }
-          else {
+          } else {
               frame = 0;
           }
-
 
           var x = this.pos[0];
           var y = this.pos[1];
@@ -129,7 +128,7 @@
                         x, y,
                         this.size[0], this.size[1],
                         0, 0,
-                        this.size[0], this.size[1]);
+                        dSize[0], dSize[1]);
       }
   };
 
@@ -184,7 +183,7 @@
     const scale = entity.scale || 1;
 
     ctx.setTransform(scale / sizeAdjustmentRatio, 0, 0, scale / sizeAdjustmentRatio, entity.x / sizeAdjustmentRatio, entity.y / sizeAdjustmentRatio);
-    sprite.render(ctx);
+    sprite.render(ctx, [entity.w, entity.h]);
     ctx.setTransform(1, 0, 0, 1, 0, 0);
   }
 
@@ -258,8 +257,8 @@
         new Sprite('img/button-sprite.png', [0, 0], [64, 32]),
         new Sprite('img/button-sprite.png', [64, 0], [64, 32])
       ],
-      (this.width/2) - 32, (this.height/2) - 16,
-      64, 32,
+      (this.width/2) - 48, (this.height/2) - 24,
+      96, 48,
       0
     );
 
@@ -268,8 +267,8 @@
         new Sprite('img/button-sprite.png', [0, 96], [32, 32]),
         new Sprite('img/button-sprite.png', [32, 96], [32, 32])
       ],
-      (this.width/2) - 48, (this.height/2) - 16,
-      32, 32,
+      (this.width/2) - 64, (this.height/2) - 24,
+      48, 48,
       0
     );
 
@@ -278,8 +277,8 @@
         new Sprite('img/button-sprite.png', [0, 32], [64, 32]),
         new Sprite('img/button-sprite.png', [64, 32], [64, 32])
       ],
-      (this.width/2) + 16, (this.height/2) - 16,
-      64, 32,
+      (this.width/2) + 16, (this.height/2) - 24,
+      96, 48,
       0
     );
 
@@ -288,8 +287,8 @@
         new Sprite('img/button-sprite.png', [0, 64], [64, 32]),
         new Sprite('img/button-sprite.png', [64, 64], [64, 32])
       ],
-      (this.width/2) - 64, (this.height/2) - 16,
-      64, 32,
+      (this.width/2) - 112, (this.height/2) - 24,
+      96, 48,
       0
     );
   }
