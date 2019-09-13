@@ -252,6 +252,13 @@
     this.pauseButtonPressed = false;
     this.scene = 'load';
 
+    this.font = {
+      w: 16,
+      h: 16,
+      sprites: [],
+      spritesSpecial: []
+    }
+
     this.startButton = new Button(
       [
         new Sprite('img/button-sprite.png', [0, 0], [64, 32]),
@@ -294,6 +301,16 @@
   }
 
   Game.prototype = {
+    loadFontSprite: function() {
+      for (let i = 0; i < this.charList.length; i++) {
+        this.font.sprites.push(new Sprite('img/font.png', [i * 16, 0], [16, 16]));
+      }
+
+      for (let i = 0; i < this.specialChars.length; i++) {
+        this.font.spritesSpecial.push(new Sprite('img/font.png', [i * 16, 16], [16, 16]));
+      }
+    },
+
     fillRandomTile: function() {
       const emptyTiles = [];
 
@@ -393,7 +410,9 @@
       }
     },
 
-    applySpecialEffect: function(char) {
+    applySpecialEffect: function(tile) {
+      const char = this.board[tile];
+
       if (char === '?') {
         // pick random special char except the last one ('?').
         char = this.specialChars[Math.floor(Math.random() * this.specialChars.length - 1)];
@@ -430,7 +449,7 @@
       const tile = this.getTileIndex(this.cursorAt[0], this.cursorAt[1]); 
 
       if (this.board[tile]) {
-        this.applySpecialEffect(this.board[tile]);
+        this.applySpecialEffect(tile);
         this.displayUpdatedValue(this.score += this.scorePerTile, this.scoreEl);
 
         this.toNextLevel--;
@@ -558,10 +577,18 @@
           const y = j * this.tileSize;
 
           if (tile) {
-            const fontSize = 18;
-            this.ctx.fillStyle = '#000';
-            this.ctx.font = fontSize + 'px Arial';
-            this.ctx.fillText(tile, x + (this.tileSize/2) - (fontSize/2), y + (this.tileSize/2) + (fontSize/2));
+            const charEntity = {
+              x: x + (this.tileSize/2) - (this.font.w/2),
+              y: y + (this.tileSize/2) - (this.font.h/2),
+              w: this.font.w,
+              h: this.font.h
+            }
+
+            charEntity.sprite = this.specialChars.indexOf(tile) > -1 ?
+              this.font.spritesSpecial[this.specialChars.indexOf(tile)] :
+              this.font.sprites[this.charList.indexOf(tile)];
+
+            renderEntity(this.ctx, charEntity);
           }
           
           this.ctx.lineWidth = lineWidth;
@@ -781,6 +808,7 @@
     },
 
     init: function() {
+      this.loadFontSprite();
       this.displayUpdatedValue(
         this.bestScore = localStorage.getItem(this.db) || 0,
         this.bestScoreEl
@@ -802,9 +830,10 @@
       escButtonEl: document.getElementById('esc-button')
     });
     game.load([
-      'img/button-sprite.png'
+      'img/button-sprite.png',
+      'img/font.png'
     ]);
     game.init();
-    window.game = game;
+    window.game = game; //debug
   });
 })();
