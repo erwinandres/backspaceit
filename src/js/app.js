@@ -261,8 +261,8 @@
 
     this.startButton = new Button(
       [
-        new Sprite('img/button-sprite.png', [0, 0], [64, 32]),
-        new Sprite('img/button-sprite.png', [64, 0], [64, 32])
+        new Sprite('button-sprite.png', [0, 0], [64, 32]),
+        new Sprite('button-sprite.png', [64, 0], [64, 32])
       ],
       (this.width/2) - 48, (this.height/2) - 24,
       96, 48,
@@ -271,8 +271,8 @@
 
     this.escButton = new Button(
       [
-        new Sprite('img/button-sprite.png', [0, 96], [32, 32]),
-        new Sprite('img/button-sprite.png', [32, 96], [32, 32])
+        new Sprite('button-sprite.png', [0, 96], [32, 32]),
+        new Sprite('button-sprite.png', [32, 96], [32, 32])
       ],
       (this.width/2) - 64, (this.height/2) - 24,
       48, 48,
@@ -281,8 +281,8 @@
 
     this.exitButton = new Button(
       [
-        new Sprite('img/button-sprite.png', [0, 32], [64, 32]),
-        new Sprite('img/button-sprite.png', [64, 32], [64, 32])
+        new Sprite('button-sprite.png', [0, 32], [64, 32]),
+        new Sprite('button-sprite.png', [64, 32], [64, 32])
       ],
       (this.width/2) + 16, (this.height/2) - 24,
       96, 48,
@@ -291,8 +291,8 @@
 
     this.shareButton = new Button(
       [
-        new Sprite('img/button-sprite.png', [0, 64], [64, 32]),
-        new Sprite('img/button-sprite.png', [64, 64], [64, 32])
+        new Sprite('button-sprite.png', [0, 64], [64, 32]),
+        new Sprite('button-sprite.png', [64, 64], [64, 32])
       ],
       (this.width/2) - 112, (this.height/2) - 24,
       96, 48,
@@ -303,11 +303,11 @@
   Game.prototype = {
     loadFontSprite: function() {
       for (let i = 0; i < this.charList.length; i++) {
-        this.font.sprites.push(new Sprite('img/font.png', [i * 16, 0], [16, 16]));
+        this.font.sprites.push(new Sprite('font.png', [i * 16, 0], [16, 16]));
       }
 
       for (let i = 0; i < this.specialChars.length; i++) {
-        this.font.spritesSpecial.push(new Sprite('img/font.png', [i * 16, 16], [16, 16]));
+        this.font.spritesSpecial.push(new Sprite('font.png', [i * 16, 16], [16, 16]));
       }
     },
 
@@ -717,7 +717,14 @@
             this.scene = 'menu';
           } else if (this.shareButton.hover([touchX, touchY])) {
             // Share
-            window.open('https://twitter.com/share?text=I scored ' + this.score + ' points on Backspace.&hashtags=backspaceGame,js13kGames&url=' + location.href);
+            window.open(
+              'https://twitter.com/intent/tweet?text=I reached level ' +
+              this.level +
+              ' and scored ' +
+              this.score +
+              ' points on "Backspace".&hashtags=backspaceGame,js13kGames&url=' +
+              location.href
+            );
           }
           break;
       }
@@ -830,8 +837,8 @@
       escButtonEl: document.getElementById('esc-button')
     });
     game.load([
-      'img/button-sprite.png',
-      'img/font.png'
+      'button-sprite.png',
+      'font.png'
     ]);
     game.init();
     window.game = game; //debug
