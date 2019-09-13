@@ -230,7 +230,7 @@
     this.rows = 8;
     this.cols = 8;
     this.charList = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    this.specialChars = '*+-/';
+    this.specialChars = '*+-/?';
     this.board = new Array(this.rows * this.cols);
 
     this.lastAdd = 0; // last chacter added (in s ago)
@@ -394,35 +394,44 @@
       }
     },
 
+    applySpecialEffect: function(char) {
+      if (char === '?') {
+        // pick random special char except the last one ('?').
+        char = this.specialChars[Math.floor(Math.random() * this.specialChars.length - 1)];
+      }
+
+      switch (char) {
+        case '-':
+          this.clearRow(this.cursorAt[1]);
+          break;
+        case '+':
+          this.clearRow(this.cursorAt[1]);
+          this.clearCol(this.cursorAt[0]);
+          break;
+        case '/':
+          this.clearSlash(this.cursorAt);
+          break;
+        case '\\':
+          this.clearBackSlash(this.cursorAt);
+          break;
+        case '*':
+          this.clearRow(this.cursorAt[1]);
+          this.clearCol(this.cursorAt[0]);
+          this.clearSlash(this.cursorAt);
+          this.clearBackSlash(this.cursorAt);
+          break;
+        default:
+          this.board[tile] = null;
+          break;
+      }
+
+    },
+
     backspace: function() {
       const tile = this.getTileIndex(this.cursorAt[0], this.cursorAt[1]); 
 
       if (this.board[tile]) {
-        switch (this.board[tile]) {
-          case '-':
-            this.clearRow(this.cursorAt[1]);
-            break;
-          case '+':
-            this.clearRow(this.cursorAt[1]);
-            this.clearCol(this.cursorAt[0]);
-            break;
-          case '/':
-            this.clearSlash(this.cursorAt);
-            break;
-          case '\\':
-            this.clearBackSlash(this.cursorAt);
-            break;
-          case '*':
-            this.clearRow(this.cursorAt[1]);
-            this.clearCol(this.cursorAt[0]);
-            this.clearSlash(this.cursorAt);
-            this.clearBackSlash(this.cursorAt);
-            break;
-          default:
-            this.board[tile] = null;
-            break;
-        }
-
+        this.applySpecialEffect(this.board[tile]);
         this.displayUpdatedValue(this.score += this.scorePerTile, this.scoreEl);
 
         this.toNextLevel--;
