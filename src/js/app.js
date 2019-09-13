@@ -1,3 +1,6 @@
+// ZzFXmicro - Zuper Zmall Zound Zynth - MIT License - Copyright 2019 Frank Force
+zzfx_v=.5;zzfx_x=new AudioContext;zzfx=(e,f,a,b=1,d=.1,g=0,h=0,k=0,l=0)=>{let S=44100,P=Math.PI;a*=2*P/S;a*=1+f*(2*Math.random()-1);g*=1E3*P/(S**2);b=0<b?S*(10<b?10:b)|0:1;d*=b|0;k*=2*P/S;l*=P;f=[];for(var m=0,n=0,c=0;c<b;++c)f[c]=e*zzfx_v*Math.cos(m*a*Math.cos(n*k+l))*(c<d?c/d:1-(c-d)/(b-d)),m+=1+h*(2*Math.random()-1),n+=1+h*(2*Math.random()-1),a+=g;e=zzfx_x.createBuffer(1,b,S);a=zzfx_x.createBufferSource();e.getChannelData(0).set(f);a.buffer=e;a.connect(zzfx_x.destination);a.start();return a}
+
 (function() {
   'use strict';
 
@@ -19,6 +22,17 @@
     }
 
     return string;
+  }
+
+  function renderEntity(ctx, entity, sizeAdjustmentRatio, sprite) {
+    sizeAdjustmentRatio = sizeAdjustmentRatio || 1;
+    sprite = sprite || entity.sprite;
+
+    const scale = entity.scale || 1;
+
+    ctx.setTransform(scale / sizeAdjustmentRatio, 0, 0, scale / sizeAdjustmentRatio, entity.x / sizeAdjustmentRatio, entity.y / sizeAdjustmentRatio);
+    sprite.render(ctx, [entity.w, entity.h]);
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
   }
 
   const resourceCache = {};
@@ -176,17 +190,6 @@
       return this._keys[keyCode];
   };
 
-  function renderEntity(ctx, entity, sizeAdjustmentRatio, sprite) {
-    sizeAdjustmentRatio = sizeAdjustmentRatio || 1;
-    sprite = sprite || entity.sprite;
-
-    const scale = entity.scale || 1;
-
-    ctx.setTransform(scale / sizeAdjustmentRatio, 0, 0, scale / sizeAdjustmentRatio, entity.x / sizeAdjustmentRatio, entity.y / sizeAdjustmentRatio);
-    sprite.render(ctx, [entity.w, entity.h]);
-    ctx.setTransform(1, 0, 0, 1, 0, 0);
-  }
-
   function Button(sprites, x, y, w, h, initialState) {
     this.x = x;
     this.y = y;
@@ -203,6 +206,18 @@
         point[0] < this.x + this.w &&
         point[1] > this.y &&
         point[1] < this.y + this.h;
+    },
+
+    sound: function() {
+      zzfx(.5,.1,1549,.1,0,0,1.2,48.9,.17); // ZzFX 77467
+    },
+
+    setState: function(newState) {
+      if (newState === 1) {
+        zzfx(.5,.1,1549,.1,0,0,1.2,48.9,.17); // ZzFX 77467
+      }
+
+      this.state = newState;
     },
 
     render: function(ctx) {
@@ -411,38 +426,42 @@
     },
 
     applySpecialEffect: function(tile) {
-      const char = this.board[tile];
+      let char = this.board[tile];
 
       if (char === '?') {
         // pick random special char except the last one ('?').
-        char = this.specialChars[Math.floor(Math.random() * this.specialChars.length - 1)];
+        char = this.specialChars[Math.floor(Math.random() * (this.specialChars.length - 1))];
       }
 
       switch (char) {
         case '-':
           this.clearRow(this.cursorAt[1]);
+          zzfx(1,.1,615,.2,.39,1.7,2.9,0,.07); // ZzFX 49164
           break;
         case '+':
           this.clearRow(this.cursorAt[1]);
           this.clearCol(this.cursorAt[0]);
+          zzfx(1,.1,674,.2,.19,2.7,1,4.1,.71); // ZzFX 52990
           break;
         case '/':
           this.clearSlash(this.cursorAt);
+          zzfx(1,.1,1302,.3,.13,.1,4.1,23.6,.45); // ZzFX 23327
           break;
         case '\\':
           this.clearBackSlash(this.cursorAt);
+          zzfx(1,.1,958,.3,.63,9.2,2.7,70.2,.15); // ZzFX 24852
           break;
         case '*':
           this.clearRow(this.cursorAt[1]);
           this.clearCol(this.cursorAt[0]);
           this.clearSlash(this.cursorAt);
           this.clearBackSlash(this.cursorAt);
+          zzfx(1,.1,9,.8,.17,6.3,.9,8.3,.2); // ZzFX 6501
           break;
         default:
           this.board[tile] = null;
           break;
       }
-
     },
 
     backspace: function() {
@@ -458,6 +477,8 @@
           this.displayUpdatedValue(this.level++, this.levelEl);
           this.toNextLevel = 10;
         }
+
+        zzfx(1,.1,1363,.3,0,.1,3.2,0,.85); // ZzFX 39192
       }
     },
 
@@ -476,10 +497,13 @@
         case 'playing':
           if (this.countEmptyTiles() === 0) {
             this.scene = 'gameover';
+            
             if (this.score > this.bestScore) {
               this.displayUpdatedValue(this.bestScore = this.score, this.bestScoreEl);
               localStorage.setItem(this.db, this.bestScore);
             }
+
+            zzfx(1,.1,153,1.7,.13,.2,.7,4.2,.06); // ZzFX 13305
             return;
           }
 
@@ -498,8 +522,9 @@
 
           if (this.lastAdd >= (this.speed - (this.level * 0.05))) {
             this.fillRandomTile();
-
             this.lastAdd = 0;
+
+            zzfx(.8,.1,190,.05,.06,1.8,.5,0,.31); // ZzFX 62656
           }
 
           const luckyStringStartIndex = this.board.findIndex(char => char === this.luckyString[0]);
@@ -528,6 +553,7 @@
                 this.luckyStringEl
               );
 
+              zzfx(1,.1,29,.9,.29,.3,0,13,.69); // ZzFX 9289
               // TODO: animation
             }
           }
@@ -646,27 +672,28 @@
       switch (this.scene) {
         case 'menu':
           if (this.startButton.hover([touchX, touchY])) {
-            this.startButton.state = 1;
+            this.startButton.setState(1);
           }
           break;
         case 'pause':
           if (this.escButton.hover([touchX, touchY])) {
-            this.escButton.state = 1;
+            this.escButton.setState(1);
           } else if (this.exitButton.hover([touchX, touchY])) {
-            this.exitButton.state = 1;
+            this.exitButton.setState(1);
           }
 
           break;
         case 'gameover':
           if (this.shareButton.hover([touchX, touchY])) {
-            this.shareButton.state = 1;
+            this.shareButton.setState(1);
           } else if (this.exitButton.hover([touchX, touchY])) {
-            this.exitButton.state = 1;
+            this.exitButton.setState(1);
           }
 
           break;
         case 'playing':
           this.cursorAt = this.getTileCoordsFromPoint(touchX, touchY);
+          zzfx(1.5,.05,1500,.02,.01,2.1,0,0,.31); // ZzFX 51217
           break;
       }
     },
@@ -679,10 +706,11 @@
       const touchX = x - this.canvasRect.left;
       const touchY = y - this.canvasRect.top;
 
-      this.startButton.state = 0;
-      this.escButton.state = 0;
-      this.exitButton.state = 0;
-      this.shareButton.state = 0;
+      this.startButton.setState(0);
+      this.escButton.setState(0);
+      this.exitButton.setState(0);
+      this.shareButton.setState(0);
+
       switch (this.scene) {
         case 'menu':
           if (this.startButton.hover([touchX, touchY])) {
